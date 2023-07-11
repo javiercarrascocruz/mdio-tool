@@ -21,6 +21,7 @@ You should have received a copy of the GNU General Public License
 along with mdio-tool.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#include <stdint.h>
 #include <unistd.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -48,7 +49,7 @@ static struct ifreq ifr;
 
 /*--------------------------------------------------------------------*/
 
-static int mdio_read(int skfd, int location)
+static int mdio_read(int skfd, uint16_t location)
 {
     struct mii_data *mii = (struct mii_data *)&ifr.ifr_data;
     mii->reg_num = location;
@@ -60,7 +61,7 @@ static int mdio_read(int skfd, int location)
     return mii->val_out;
 }
 
-static void mdio_write(int skfd, int location, int value)
+static void mdio_write(int skfd, uint16_t location, uint16_t value)
 {
     struct mii_data *mii = (struct mii_data *)&ifr.ifr_data;
     mii->reg_num = location;
@@ -74,7 +75,7 @@ static void mdio_write(int skfd, int location, int value)
 
 int main(int argc, char **argv)
 {
-	int addr, dev, val;
+	uint16_t addr, val;
 
 	if(argc < 2) {
 		printf("Usage mii [r/w] [dev] [reg] [val]\n");
