@@ -75,7 +75,6 @@ static void mdio_write(int skfd, int location, int value)
 int main(int argc, char **argv)
 {
 	int addr, dev, val;
-	struct mii_data *mii = (struct mii_data *)&ifr.ifr_data;
 
 	if(argc < 2) {
 		printf("Usage mii [r/w] [dev] [reg] [val]\n");
