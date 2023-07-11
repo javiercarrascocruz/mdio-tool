@@ -51,25 +51,25 @@ static struct ifreq ifr;
 
 static int mdio_read(int skfd, uint16_t location)
 {
-    struct mii_data *mii = (struct mii_data *)&ifr.ifr_data;
-    mii->reg_num = location;
-    if (ioctl(skfd, SIOCGMIIREG, &ifr) < 0) {
+	struct mii_data *mii = (struct mii_data *)&ifr.ifr_data;
+	mii->reg_num = location;
+	if (ioctl(skfd, SIOCGMIIREG, &ifr) < 0) {
 	fprintf(stderr, "SIOCGMIIREG on %s failed: %s\n", ifr.ifr_name,
 		strerror(errno));
 	return -1;
-    }
-    return mii->val_out;
+	}
+	return mii->val_out;
 }
 
 static void mdio_write(int skfd, uint16_t location, uint16_t value)
 {
-    struct mii_data *mii = (struct mii_data *)&ifr.ifr_data;
-    mii->reg_num = location;
-    mii->val_in = value;
-    if (ioctl(skfd, SIOCSMIIREG, &ifr) < 0) {
+	struct mii_data *mii = (struct mii_data *)&ifr.ifr_data;
+	mii->reg_num = location;
+	mii->val_in = value;
+	if (ioctl(skfd, SIOCSMIIREG, &ifr) < 0) {
 	fprintf(stderr, "SIOCSMIIREG on %s failed: %s\n", ifr.ifr_name,
 		strerror(errno));
-    }
+	}
 }
 
 
