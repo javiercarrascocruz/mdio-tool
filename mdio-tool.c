@@ -44,6 +44,15 @@ along with mdio-tool.  If not, see <http://www.gnu.org/licenses/>.
 
 #define MAX_ETH		8		/* Maximum # of interfaces */
 
+#define REGCR 0x0D
+#define ADDAR 0x0E
+
+#define REGCR_MMD_A 0x001F
+#define REGCR_MMD_D 0x401F
+
+#define MDIO_TOP_ADDR 0x1F
+#define MMD_TOP_ADDR 0x4D1
+
 static int skfd = -1;		/* AF_INET socket for ioctl() calls. */
 static struct ifreq ifr;
 
@@ -72,6 +81,22 @@ static void mdio_write(int skfd, uint16_t location, uint16_t value)
 	}
 }
 
+static int mmd_read(int skfd, uint16_t location)
+{
+	mdio_write(skfd, REGCR, REGCR_MMD_A);
+	mdio_write(skfd, ADDAR, location);
+	mdio_write(skfd, REGCR, REGCR_MMD_D);
+
+	return mdio_read(skfd, ADDAR);
+}
+
+static void mmd_write(int skfd, uint16_t location, uint16_t value)
+{
+	mdio_write(skfd, REGCR, REGCR_MMD_A);
+	mdio_write(skfd, ADDAR, location);
+	mdio_write(skfd, REGCR, REGCR_MMD_D);
+	mdio_write(skfd, ADDAR, value);
+}
 
 int main(int argc, char **argv)
 {
@@ -92,19 +117,41 @@ int main(int argc, char **argv)
 	strncpy(ifr.ifr_name, argv[2], IFNAMSIZ);
 	if (ioctl(skfd, SIOCGMIIPHY, &ifr) < 0) {
 		if (errno != ENODEV)
-		fprintf(stderr, "SIOCGMIIPHY on '%s' failed: %s\n",
-			argv[2], strerror(errno));
+			fprintf(stderr, "SIOCGMIIPHY on '%s' failed: %s\n",
+				argv[2], strerror(errno));
 		return -1;
 	}
 
-	if(argv[1][0] == 'r') {
-		addr = strtol(argv[3], NULL, 16);
-		printf("0x%.4x\n", mdio_read(skfd, addr));
+	if (argv[1][0] == 'r') {
+	addr = strtol(argv[3], NULL, 16);
+
+		if (addr <= MDIO_TOP_ADDR) {
+			val = mdio_read(skfd, addr);
+		}
+		else if (addr <= MMD_TOP_ADDR) {
+			val = mmd_read(skfd, addr);
+		}
+		else {
+			printf ("Not supported MMD range\n");
+			return -1;
+		}
+		printf("read addr 0x%.4x = 0x%.4x\n", addr, val);
 	}
-	else if(argv[1][0] == 'w') {
+	else if (argv[1][0] == 'w') {
 		addr = strtol(argv[3], NULL, 16);
 		val = strtol(argv[4], NULL, 16);
-		mdio_write(skfd, addr, val);
+		printf("write val %#.4x to addr %#.4x\n", val, addr);
+
+		if (addr <= MDIO_TOP_ADDR) {
+			mdio_write(skfd, addr, val);
+		}
+		else if (addr <= MMD_TOP_ADDR) {
+			mmd_write(skfd, addr, val);
+		}
+		else {
+			printf ("Not supported MMD range\n");
+			return -1;
+		}
 	}
 	else {
 		printf("Fout!\n");
