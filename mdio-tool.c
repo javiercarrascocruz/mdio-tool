@@ -78,7 +78,7 @@ int main(int argc, char **argv)
 	uint16_t addr, val;
 
 	if(argc < 2) {
-		printf("Usage mii [r/w] [dev] [reg] [val]\n");
+		printf("Usage mdio-tool [r/w] [dev] [reg] [val]\n");
 		return 0;
 	}
 
